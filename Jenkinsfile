@@ -2,13 +2,14 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "your_dockerhub_username/jenkins-demo"
+        DOCKER_IMAGE = "saiharshith1918/jenkins-demo"   // 👈 your Docker Hub repo
+        DOCKER_CREDENTIALS = "dockerhub-pass"           // 👈 Jenkins credential ID
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/yourusername/jenkins-docker-k8s-demo.git'
+                git branch: 'main', url: 'https://github.com/saiharshith1918/devops.git'
             }
         }
 
@@ -20,24 +21,24 @@ pipeline {
             }
         }
 
-        stage('Push Image to DockerHub') {
+        stage('Push to Docker Hub') {
             steps {
-                withCredentials([string(credentialsId: 'dockerhub-pass', variable: 'DOCKER_HUB_PASS')]) {
-                    sh """
-                    echo $DOCKER_HUB_PASS | docker login -u your_dockerhub_username --password-stdin
-                    docker push $DOCKER_IMAGE:$BUILD_NUMBER
-                    """
+                withCredentials([usernamePassword(credentialsId: "$DOCKER_CREDENTIALS", usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh '''
+                        echo "$PASS" | docker login -u "$USER" --password-stdin
+                        docker push $DOCKER_IMAGE:$BUILD_NUMBER
+                        docker tag $DOCKER_IMAGE:$BUILD_NUMBER $DOCKER_IMAGE:latest
+                        docker push $DOCKER_IMAGE:latest
+                    '''
                 }
             }
         }
 
-        stage('Deploy to Kubernetes') {
-            steps {
-                sh 'kubectl apply -f k8s-deployment.yaml'
-            }
-        }
+        // Uncomment this stage once Kubernetes is configured
+        // stage('Deploy to Kubernetes') {
+        //     steps {
+        //         sh 'kubectl apply -f k8s-deployment.yaml'
+        //     }
+        // }
     }
 }
-
-
-
