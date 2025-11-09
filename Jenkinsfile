@@ -2,8 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "saiharshith1918/jenkins-demo"   // 👈 your Docker Hub repo
-        DOCKER_CREDENTIALS = "dockerhub-pass"           // 👈 Jenkins credential ID
+        DOCKER_IMAGE = "harshith1918/jenkins-demo"
+
+        DOCKER_CREDENTIALS = "dockerhub-pass"
     }
 
     stages {
@@ -15,9 +16,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh 'docker build -t $DOCKER_IMAGE:$BUILD_NUMBER .'
-                }
+                sh 'docker build -t $DOCKER_IMAGE:$BUILD_NUMBER .'
             }
         }
 
@@ -33,12 +32,5 @@ pipeline {
                 }
             }
         }
-
-        // Uncomment this stage once Kubernetes is configured
-        // stage('Deploy to Kubernetes') {
-        //     steps {
-        //         sh 'kubectl apply -f k8s-deployment.yaml'
-        //     }
-        // }
     }
 }
